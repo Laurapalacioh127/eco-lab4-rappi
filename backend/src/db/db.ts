@@ -16,14 +16,6 @@ export const pool = new Pool({
 });
 
 export const initDb = async () => {
-    await pool.query(`
-    CREATE TABLE IF NOT EXISTS public.products (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      name TEXT NOT NULL,
-      price NUMERIC NOT NULL,
-      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE
-    );
-  `);
   await pool.query(`CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA extensions;`);
 
   await pool.query(`
@@ -33,18 +25,6 @@ export const initDb = async () => {
       role TEXT NOT NULL,
       email TEXT NOT NULL UNIQUE
     );
-  `);
-
-  await pool.query(`
-    DO $$
-    BEGIN
-      IF EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'password'
-      ) THEN
-        ALTER TABLE public.users ALTER COLUMN password DROP NOT NULL;
-      END IF;
-    END $$;
   `);
 
   await pool.query(`
@@ -61,11 +41,20 @@ export const initDb = async () => {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS public.products (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      name TEXT NOT NULL,
+      price NUMERIC NOT NULL,
+      store_id UUID NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE
+    );
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS public.orders (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      client_id UUID NOT NULL REFERENCES users(id),
-      delivery_id UUID REFERENCES users(id),
-      store_id UUID NOT NULL REFERENCES stores(id),
+      client_id UUID NOT NULL REFERENCES public.users(id),
+      delivery_id UUID REFERENCES public.users(id),
+      store_id UUID NOT NULL REFERENCES public.stores(id),
       status TEXT NOT NULL DEFAULT 'waiting_for_delivery',
       delivery_location GEOGRAPHY(POINT, 4326),
       courier_location GEOGRAPHY(POINT, 4326),
@@ -74,17 +63,14 @@ export const initDb = async () => {
   `);
 
   await pool.query(`
-    ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_location GEOGRAPHY(POINT, 4326);
-    ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS courier_location GEOGRAPHY(POINT, 4326);
-    UPDATE public.orders SET status = 'waiting_for_delivery' WHERE status = 'waiting_for_deliver';
     CREATE INDEX IF NOT EXISTS orders_delivery_location_idx ON public.orders USING GIST (delivery_location);
   `);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS public.order_items (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-      product_id UUID NOT NULL REFERENCES products(id),
+      order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+      product_id UUID NOT NULL REFERENCES public.products(id),
       quantity NUMERIC NOT NULL CHECK (quantity > 0)
     );
   `);
