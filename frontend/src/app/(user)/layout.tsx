@@ -9,7 +9,11 @@ export default function UserLayout({
   return (
     <RequireAuth>
       <Header />
-      {children}
+      <div className="mx-auto w-full max-w-5xl px-4 py-6">
+        <div className="rounded-3xl bg-white/90 p-6 shadow-xl border border-purple-100">
+          {children}
+        </div>
+      </div>
     </RequireAuth>
   );
 }

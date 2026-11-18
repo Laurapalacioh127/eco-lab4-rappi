@@ -11,7 +11,7 @@ export const Button = ({
 }) => {
   return (
     <button
-      className={` ${secondary ? "border border-gray-900 hover:bg-gray-900 hover:text-white" : "bg-gray-900 text-white"} disabled:bg-gray-200 disabled:cursor-default rounded-full py-2 px-4  cursor-pointer transition-all`}
+    className={` ${secondary ? "border-2 border-purple-700 text-purple-700 hover:bg-purple-700 hover:text-white" : "bg-purple-700 text-white hover:bg-orange-500"} disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-default rounded-full py-2 px-5 font-medium cursor-pointer transition-all shadow-sm`}
       disabled={disabled}
       onClick={onClick}
     >

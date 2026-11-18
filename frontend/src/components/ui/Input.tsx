@@ -18,7 +18,7 @@ export const Input = ({
       name={name}
       onChange={onChange}
       placeholder={placeholder}
-      className="border border-gray-900 rounded-full py-2 px-4"
+      className="border-2 border-purple-200 bg-white rounded-full py-2 px-4 outline-none focus:border-orange-500 transition-colors"
     />
   );
 };
